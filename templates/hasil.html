@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Hasil Diagnosa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Hasil Analisis Rontgen</h1>
+
+        <img src="{{ image_url }}" alt="Gambar Rontgen" class="xray-image">
+
+        <h2>Hasil Prediksi: {{ result }}</h2>
+        <p class="reason">{{ reason|safe }}</p>
+
+        <form method="post" action="{{ url_for('validasi') }}" class="validation-form">
+            <label>Apakah hasil ini sesuai menurut dokter?</label><br>
+            <select name="validasi" required>
+                <option value="">-- Pilih --</option>
+                <option value="Valid">✅ Valid</option>
+                <option value="Tidak Valid">❌ Tidak Valid</option>
+            </select>
+            <input type="submit" value="Kirim Validasi">
+        </form>
+
+        <a href="{{ url_for('index') }}" class="back-button">🔄 Upload Ulang</a>
+    </div>
+</body>
+</html>

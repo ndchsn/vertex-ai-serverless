@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Hasil Validasi Dokter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Validasi Diagnosa</h1>
+
+        <img src="{{ image_url }}" alt="Gambar Rontgen" class="xray-image">
+
+        <h2>Hasil Prediksi: {{ result }}</h2>
+        <p class="reason">{{ reason|safe }}</p>
+
+        <div class="validation-result">
+            <p><strong>Validasi Dokter:</strong> {{ doctor_validation }}</p>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="back-button">🔄 Upload Ulang</a>
+    </div>
+</body>
+</html>

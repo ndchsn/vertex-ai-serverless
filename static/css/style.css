@@ -1,0 +1,76 @@
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background-color: #0f0f0f;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 700px;
+    margin: 50px auto;
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 255, 100, 0.3);
+    text-align: center;
+}
+
+h1 {
+    color: #00e676;
+    margin-bottom: 10px;
+}
+
+h2 {
+    color: #03a9f4;
+    margin: 20px 0;
+}
+
+input[type="file"],
+select,
+input[type="submit"] {
+    margin-top: 15px;
+    padding: 10px;
+    width: 90%;
+    font-size: 1em;
+    border-radius: 8px;
+    border: none;
+}
+
+input[type="submit"] {
+    background-color: #03a9f4;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #0288d1;
+}
+
+.reason {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    color: #ccc;
+    margin: 20px 0;
+    text-align: justify;
+}
+
+.xray-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.validation-form {
+    margin-top: 30px;
+}
+
+.validation-result {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #00e676;
+}
