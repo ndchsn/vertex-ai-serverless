@@ -1,0 +1,21 @@
+# === .cloudbuild.yaml ===
+steps:
+    - name: 'gcr.io/cloud-builders/docker'
+      args: ['build', '-t', 'gcr.io/mlpt-cloudteam-migration/pneumonia-app', '.']
+  
+    - name: 'gcr.io/cloud-builders/docker'
+      args: ['push', 'gcr.io/mlpt-cloudteam-migration/pneumonia-app']
+  
+    - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+      entrypoint: gcloud
+      args:
+        [
+          'run', 'deploy', 'pneumonia-app',
+          '--image', 'gcr.io/mlpt-cloudteam-migration/pneumonia-app',
+          '--region', 'asia-southeast2',
+          '--platform', 'managed',
+          '--allow-unauthenticated'
+        ]
+  images:
+    - 'gcr.io/mlpt-cloudteam-migration/pneumonia-app'
+  

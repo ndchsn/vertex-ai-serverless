@@ -1,6 +1,10 @@
-flask
+# === requirements.txt ===
+Flask
 requests
+Pillow
 numpy
-pillow
-io
-
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+Werkzeug
