@@ -14,7 +14,7 @@ app.secret_key = "secretkey"
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-SERVICE_ACCOUNT_FILE = "/home/andi_jalaluddin/vertex/sa-vertex.json"  # Ganti path sesuai lokasi file
+SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE", "sa-vertex.json")
 VERTEX_ENDPOINT = "https://asia-southeast2-aiplatform.googleapis.com/v1/projects/mlpt-cloudteam-migration/locations/asia-southeast2/endpoints/320059038752571392:predict"
 
 # Utilitas
@@ -98,12 +98,15 @@ def hasil():
         image_url=url_for("static", filename="uploads/" + session.get("uploaded_file", ""))
     )
 
-@app.route("/validasi")
+@app.route("/validasi", methods=["POST"])
 def validasi():
-    return render_template("validasi.html",
+    doctor_validation = request.form.get("validasi")
+    session["doctor_validation"] = doctor_validation
+    return render_template(
+        "validasi.html",
         result=session.get("result"),
         reason=session.get("reason"),
-        doctor_validation=session.get("doctor_validation"),
+        doctor_validation=doctor_validation,
         image_url=url_for("static", filename="uploads/" + session.get("uploaded_file", ""))
     )
 

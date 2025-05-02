@@ -1,5 +1,17 @@
 # === .cloudbuild.yaml ===
+availableSecrets:
+  secretManager:
+    - versionName: projects/mlpt-cloudteam-migration/secrets/sa-vertex-json/versions/latest
+      env: 'SA_KEY'
+
 steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: /bin/bash
+    args:
+      - -c
+      - |
+        echo "$SA_KEY" > sa-vertex.json
+
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/mlpt-cloudteam-migration/pneumonia-app', '.']
 
