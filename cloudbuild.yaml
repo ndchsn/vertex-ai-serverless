@@ -14,7 +14,7 @@ steps:
         '--region', 'asia-southeast2',
         '--platform', 'managed',
         '--allow-unauthenticated',
-        '--service-account', 'sa-vertex@mlpt-cloudteam-migration.iam.gserviceaccount.com'
+        '--service-account', 'cloudrun-sa@mlpt-cloudteam-migration.iam.gserviceaccount.com'
       ]
 
 images:
