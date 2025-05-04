@@ -16,3 +16,6 @@ steps:
         '--allow-unauthenticated',
         '--service-account', 'sa-vertex@mlpt-cloudteam-migration.iam.gserviceaccount.com'
       ]
+
+images:
+  - 'asia-southeast2-docker.pkg.dev/mlpt-cloudteam-migration/pneumonia-detector3'
