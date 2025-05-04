@@ -1,23 +1,26 @@
 # === app.py ===
 from flask import Flask, request, render_template, redirect, url_for, session
-from werkzeug.utils import secure_filename
-from google.oauth2 import service_account
+from google.cloud import storage
+from google.auth import default
 from google.auth.transport.requests import Request
 from PIL import Image
 import numpy as np
 import requests
 import os
+import tempfile
+import uuid
 
-# Konfigurasi
+# Konfigurasi dasar
 app = Flask(__name__)
 app.secret_key = "secretkey"
-UPLOAD_FOLDER = "static/uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE", "sa-vertex.json")
+
+# GCS config
+BUCKET_NAME = "pneumonia-xray-bucket"
+
+# Endpoint Vertex AI
 VERTEX_ENDPOINT = "https://asia-southeast2-aiplatform.googleapis.com/v1/projects/mlpt-cloudteam-migration/locations/asia-southeast2/endpoints/320059038752571392:predict"
 
-# Utilitas
+# Ukuran input ke model
 IMG_SIZE = 150
 
 def preprocess_image(img):
@@ -26,12 +29,17 @@ def preprocess_image(img):
     return img_array.reshape(1, IMG_SIZE, IMG_SIZE, 3).tolist()
 
 def get_token():
-    credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
-        scopes=["https://www.googleapis.com/auth/cloud-platform"]
-    )
+    credentials, _ = default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
     credentials.refresh(Request())
     return credentials.token
+
+def upload_to_gcs(file_path, destination_blob_name):
+    client = storage.Client()
+    bucket = client.bucket(BUCKET_NAME)
+    blob = bucket.blob(destination_blob_name)
+    blob.upload_from_filename(file_path)
+    blob.make_public()  # Agar bisa diakses dari HTML img src
+    return blob.public_url
 
 def is_possible_xray(image):
     grayscale_like = sum(
@@ -41,19 +49,21 @@ def is_possible_xray(image):
     ratio = grayscale_like / (image.size[0] * image.size[1])
     return ratio > 0.75
 
-# Routing
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         file = request.files["image"]
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+        if not file:
+            return render_template("index.html", error="Tidak ada file yang dipilih.")
 
         try:
-            image = Image.open(filepath).convert("RGB")
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
+                file.save(tmp.name)
+                tmp_path = tmp.name
+
+            image = Image.open(tmp_path).convert("RGB")
             if not is_possible_xray(image):
-                os.remove(filepath)
+                os.remove(tmp_path)
                 return render_template("index.html", error="Gambar tidak terdeteksi sebagai rontgen. Silakan upload ulang.")
 
             instance = preprocess_image(image)
@@ -64,25 +74,25 @@ def index():
             data = {"instances": instance}
             response = requests.post(VERTEX_ENDPOINT, headers=headers, json=data)
             prediction = response.json()
-            confidence = prediction['predictions'][0][0]
 
-            if confidence > 0.5:
-                result = "Pneumonia"
-                reason = "Model mendeteksi indikasi pneumonia. Harap konsultasi ke dokter."
-            else:
-                result = "Normal"
-                reason = "Tidak ditemukan tanda pneumonia pada gambar."
+            confidence = prediction['predictions'][0][0]
+            result = "Pneumonia" if confidence > 0.5 else "Normal"
+            reason = "Model mendeteksi indikasi pneumonia." if confidence > 0.5 else "Tidak ditemukan tanda pneumonia."
+
+            # Upload gambar ke GCS
+            unique_filename = f"{uuid.uuid4().hex}.jpg"
+            public_url = upload_to_gcs(tmp_path, unique_filename)
+            os.remove(tmp_path)
 
             session.update({
                 "result": result,
                 "reason": reason,
-                "uploaded_file": filename
+                "image_url": public_url
             })
             return redirect(url_for("hasil"))
 
         except Exception as e:
-            os.remove(filepath)
-            return render_template("index.html", error="Terjadi kesalahan dalam memproses gambar. Pastikan gambar valid.")
+            return render_template("index.html", error=f"Terjadi kesalahan: {str(e)}")
 
     return render_template("index.html")
 
@@ -95,20 +105,18 @@ def hasil():
     return render_template("hasil.html",
         result=session.get("result"),
         reason=session.get("reason"),
-        image_url=url_for("static", filename="uploads/" + session.get("uploaded_file", ""))
+        image_url=session.get("image_url")
     )
 
-@app.route("/validasi", methods=["POST"])
+@app.route("/validasi")
 def validasi():
-    doctor_validation = request.form.get("validasi")
-    session["doctor_validation"] = doctor_validation
-    return render_template(
-        "validasi.html",
+    return render_template("validasi.html",
         result=session.get("result"),
         reason=session.get("reason"),
-        doctor_validation=doctor_validation,
-        image_url=url_for("static", filename="uploads/" + session.get("uploaded_file", ""))
+        doctor_validation=session.get("doctor_validation"),
+        image_url=session.get("image_url")
     )
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)

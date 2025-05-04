@@ -1,32 +1,18 @@
-# === .cloudbuild.yaml ===
-availableSecrets:
-  secretManager:
-    - versionName: projects/mlpt-cloudteam-migration/secrets/sa-vertex-json/versions/latest
-      env: 'SA_KEY'
-
 steps:
-  - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: /bin/bash
-    args:
-      - -c
-      - |
-        echo "$SA_KEY" > sa-vertex.json
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', 'gcr.io/mlpt-cloudteam-migration/pneumonia-detector3', '.' ]
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/mlpt-cloudteam-migration/pneumonia-app', '.']
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/mlpt-cloudteam-migration/pneumonia-app']
+    args: [ 'push', 'gcr.io/mlpt-cloudteam-migration/pneumonia-detector3' ]
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       [
-        'run', 'deploy', 'pneumonia-app',
-        '--image', 'gcr.io/mlpt-cloudteam-migration/pneumonia-app',
+        'run', 'deploy', 'pneumonia-detector-3',
+        '--image', 'gcr.io/mlpt-cloudteam-migration/pneumonia-detector3',
         '--region', 'asia-southeast2',
         '--platform', 'managed',
-        '--allow-unauthenticated'
+        '--allow-unauthenticated',
+        '--service-account', 'sa-vertex@mlpt-cloudteam-migration.iam.gserviceaccount.com'
       ]
-images:
-  - 'gcr.io/mlpt-cloudteam-migration/pneumonia-app'

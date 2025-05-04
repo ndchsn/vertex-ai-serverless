@@ -2,20 +2,20 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Hasil Diagnosa</title>
+    <title>Hasil Deteksi</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>📋 Hasil Analisis Rontgen</h1>
+        <h1>📋 Hasil Deteksi</h1>
 
         <img src="{{ image_url }}" alt="Gambar Rontgen" class="xray-image">
 
-        <h2>Hasil Prediksi: {{ result }}</h2>
-        <p class="reason">{{ reason|safe }}</p>
+        <h2>Hasil: {{ result }}</h2>
+        <p class="reason">{{ reason }}</p>
 
-        <form method="post" action="{{ url_for('validasi') }}" class="validation-form">
-            <label>Apakah hasil ini sesuai menurut dokter?</label><br>
+        <form method="post">
+            <label>Validasi oleh dokter:</label><br>
             <select name="validasi" required>
                 <option value="">-- Pilih --</option>
                 <option value="Valid">✅ Valid</option>

@@ -1,24 +1,42 @@
+<!-- templates/validasi.html -->
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Hasil Validasi Dokter</title>
+    <title>Validasi Dokter</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>✅ Validasi Diagnosa</h1>
+        <h1>Hasil Validasi Dokter</h1>
+        <img src="{{ image_url }}" alt="Foto Rontgen" class="xray-img">
 
-        <img src="{{ image_url }}" alt="Gambar Rontgen" class="xray-image">
+        <div class="result-box">
+            <h2>
+                {% if result == 'Normal' %}
+                    🟢 Paru-paru Normal
+                {% else %}
+                    🔴 Terindikasi Pneumonia
+                {% endif %}
+            </h2>
+            <p><strong>Penjelasan:</strong>
+                {% if result == 'Normal' %}
+                    Tidak ditemukan indikasi infeksi. Struktur paru terlihat jernih dan merata.
+                {% else %}
+                    Model mendeteksi pola opasitas putih yang menyebar di area paru, khas infeksi.
+                {% endif %}
+            </p>
+            <p><strong>Saran:</strong>
+                {% if result == 'Normal' %}
+                    Tetap jaga kesehatan dan hindari paparan asap atau polutan.
+                {% else %}
+                    Segera periksa ke dokter paru untuk tes lanjutan seperti kultur dahak atau CT scan.
+                {% endif %}
+            </p>
 
-        <h2>Hasil Prediksi: {{ result }}</h2>
-        <p class="reason">{{ reason|safe }}</p>
-
-        <div class="validation-result">
             <p><strong>Validasi Dokter:</strong> {{ doctor_validation }}</p>
         </div>
 
-        <a href="{{ url_for('index') }}" class="back-button">🔄 Upload Ulang</a>
+        <a href="{{ url_for('index') }}" class="btn">Cek Ulang</a>
     </div>
 </body>
 </html>

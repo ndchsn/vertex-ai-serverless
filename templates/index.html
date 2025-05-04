@@ -1,3 +1,4 @@
+<!-- === templates/index.html === -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -8,16 +9,16 @@
 <body>
     <div class="container">
         <h1>📷 Deteksi Pneumonia dari Rontgen</h1>
-        <p>Unggah foto rontgen pasien untuk memulai analisis</p>
+        <p>Unggah foto rontgen dada untuk mendeteksi indikasi pneumonia</p>
+
         <form method="post" enctype="multipart/form-data">
             <input type="file" name="image" accept="image/*" required>
             <input type="submit" value="Deteksi Sekarang">
         </form>
-        
+
         {% if error %}
-            <p style="color: red; margin-top: 20px;">{{ error }}</p>
+        <p style="color:red; margin-top:20px;">{{ error }}</p>
         {% endif %}
-        
     </div>
 </body>
 </html>
